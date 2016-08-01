@@ -58,7 +58,7 @@ def save_company_data(code):
     if os.path.isfile(filename) and os.path.getsize(filename) > 1000:
         return
     content = get_company_people(code)
-    out_file = open(filename, 'w')
+    out_file = open(filename, 'wb')
     out_file.write(content)
     out_file.close()
 
@@ -68,8 +68,8 @@ def save_all_people_in_one_page():
     filename = os.path.join(TEST_DATA_DIR, basename)
     if os.path.isfile(filename) and os.path.getsize(filename) > 1000:
         return
-    content = urllib2.urlopen(ALL_PEOPLE_PAGE_URL).read()
-    out_file = open(filename, 'w')
+    content = urllib.request.urlopen(ALL_PEOPLE_PAGE_URL).read()
+    out_file = open(filename, 'wb')
     out_file.write(content)
     out_file.close()
 
@@ -94,7 +94,7 @@ def parse_company_page(page_text):
 def test_parse():
     page_text = ''.join(open('RawData/20151109_G01001.html').readlines())
     info_table = parse_company_page(page_text)
-    out_file = open('out_file.txt', 'w')
+    out_file = open('out_file.txt', 'wb')
     for line in info_table:
         out_file.write(','.join(line))
         out_file.write('\n')
