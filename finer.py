@@ -1,5 +1,6 @@
 #import Parsor.Futures
-import urllib2
+import urllib.request
+import urllib.error
 import datetime
 import time
 import os
@@ -32,13 +33,18 @@ def get_company_people(company_code):
     page_content = ''
     for i in range(try_time):
         try:
-            page_content = urllib2.urlopen(page_url).read()
+            page_content = urllib.request.urlopen(page_url).read()
             if len(page_content) < 1000:
                 print('::'.join([company_code, 'try no.', str(i)]))
                 time.sleep(6)
                 continue
-        except urllib2.URLError as e:
+        except urllib.error.URLError as e:
             print(e.reason)
+            print('::'.join([company_code, 'try no.', str(i)]))
+            continue
+        except urllib.error.HTTPError as e:
+            # do something
+            print('Error code: ', e.code)
             print('::'.join([company_code, 'try no.', str(i)]))
             continue
         break
