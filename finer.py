@@ -27,21 +27,22 @@ def get_company_codes():
 
 def get_company_people(company_code):
     page_url = company_people_page_url_pattern % (company_code, )
-    print page_url
+    print('START::' + company_code)
+    print('Fetching::' + page_url)
     page_content = ''
     for i in range(try_time):
         try:
             page_content = urllib2.urlopen(page_url).read()
             if len(page_content) < 1000:
-                print('_'.join([company_code, 'try no.', str(i)]))
+                print('::'.join([company_code, 'try no.', str(i)]))
                 time.sleep(6)
                 continue
         except urllib2.URLError as e:
-            print e.reason
-            print('_'.join([company_code, 'try no.', str(i)]))
+            print(e.reason)
+            print('::'.join([company_code, 'try no.', str(i)]))
             continue
         break
-    print('_'.join([company_code, str(len(page_content))]))
+    print('::'.join(['END', company_code, str(len(page_content))]))
     return page_content
 
 
@@ -100,7 +101,7 @@ def test():
     for line in lines:
         (company_code, company_name) = line.strip().split(',')
         company[company_code] = company_name
-    print company.values()
+    print(company.values())
 
 
 def main():
