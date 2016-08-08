@@ -55,29 +55,40 @@ def save_company_data(code):
     basename = "%s_%s.html" % (datetime.date.today().strftime('%Y%m%d'), code)
     filename = os.path.join(RAW_DATA_DIR, basename)
     if os.path.isfile(filename) and os.path.getsize(filename) > 1000:
-        return
+        return 0
     content = get_company_people(code)
-    out_file = open(filename, 'wb')
-    out_file.write(content)
-    out_file.close()
+    if len(content) > 1000:
+        out_file = open(filename, 'wb')
+        out_file.write(content)
+        out_file.close()
+        return 1
+    else:
+        return 0
 
 
 def save_all_people_in_one_page():
     basename = "%s_all_people.html" % (datetime.date.today().strftime('%Y%m%d'), )
     filename = os.path.join(TEST_DATA_DIR, basename)
     if os.path.isfile(filename) and os.path.getsize(filename) > 1000:
-        return
+        return 0
     content = urllib.request.urlopen(ALL_PEOPLE_PAGE_URL, timeout=10).read()
     out_file = open(filename, 'wb')
     out_file.write(content)
     out_file.close()
+    return 1
 
 
 def save_all_data():
     codes = get_company_codes()
+    fail_list = list()
     for code in codes:
-        save_company_data(code)
-    save_all_people_in_one_page()
+        if save_company_data(code) == 0:
+            fail_list.append(code)
+    print("TOTAL SAVE %d FILES, FAILED %d" % (len(codes)-len(fail_list), len(fail_list)))
+    if save_all_people_in_one_page():
+        print("SAVED ALL PEOPLE IN ONE PAGE")
+    else:
+        print("NOT SAVE PEOPLE IN ONE PAGE")
 
 
 def main():
