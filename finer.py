@@ -11,10 +11,10 @@ import lxml.html
 __author__ = 'gnix'
 company_people_page_url_pattern = 'http://www.cfachina.org/cfainfo/organbaseinfoOneServlet?organid=+%s+&currentPage=1&pageSize=2000&selectType=personinfo&all=undefined'
 ALL_PEOPLE_PAGE_URL = 'http://www.cfachina.org/cfainfo/personinfoServlet?organid=&currentPage=1&pageSize=100000&selectType=check&cardid='
-try_time = 5
+try_time = 10
 
-RAW_DATA_DIR = 'RawData'
-TEST_DATA_DIR = 'TestData'
+RAW_DATA_DIR = '/home/ec2-user/finer/RawData'
+TEST_DATA_DIR = '/home/ec2-user/finer/TestData'
 
 
 def get_company_codes():
@@ -33,7 +33,7 @@ def get_company_people(company_code):
     page_content = ''
     for i in range(try_time):
         try:
-            page_content = urllib.request.urlopen(page_url).read()
+            page_content = urllib.request.urlopen(page_url, timeout=10).read()
             if len(page_content) < 1000:
                 print('::'.join([company_code, 'try no.', str(i)]))
                 time.sleep(6)
@@ -43,7 +43,6 @@ def get_company_people(company_code):
             print('::'.join([company_code, 'try no.', str(i)]))
             continue
         except urllib.error.HTTPError as e:
-            # do something
             print('Error code: ', e.code)
             print('::'.join([company_code, 'try no.', str(i)]))
             continue
@@ -68,7 +67,7 @@ def save_all_people_in_one_page():
     filename = os.path.join(TEST_DATA_DIR, basename)
     if os.path.isfile(filename) and os.path.getsize(filename) > 1000:
         return
-    content = urllib.request.urlopen(ALL_PEOPLE_PAGE_URL).read()
+    content = urllib.request.urlopen(ALL_PEOPLE_PAGE_URL, timeout=10).read()
     out_file = open(filename, 'wb')
     out_file.write(content)
     out_file.close()
@@ -79,35 +78,6 @@ def save_all_data():
     for code in codes:
         save_company_data(code)
     save_all_people_in_one_page()
-
-
-def parse_company_page(page_text):
-    page = lxml.html.fromstring(page_text)
-    table_path = '//table/tr'
-    rows = page.xpath(table_path)
-    data = list()
-    for row in rows:
-        data.append([td.text.encode('utf-8') for td in row.getchildren()])
-    return data
-
-
-def test_parse():
-    page_text = ''.join(open('RawData/20151109_G01001.html').readlines())
-    info_table = parse_company_page(page_text)
-    out_file = open('out_file.txt', 'wb')
-    for line in info_table:
-        out_file.write(','.join(line))
-        out_file.write('\n')
-    out_file.close()
-
-
-def test():
-    lines = open('company_list.txt', encoding='utf-8').readlines()
-    company = dict()
-    for line in lines:
-        (company_code, company_name) = line.strip().split(',')
-        company[company_code] = company_name
-    print(company.values())
 
 
 def main():
